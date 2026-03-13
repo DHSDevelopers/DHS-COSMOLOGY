@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DHS Cosmology — Daniyal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:#03050a; --deep:#070a14; --well:#0a0e1c; --card:#0d1122;
+  --rim:rgba(255,255,255,.06); --rim2:rgba(255,255,255,.03);
+  --plasma:#4fc3f7; --pulsar:#80deea; --stellar:#e8d5a3; --nova:#ff7043;
+  --plbg:rgba(79,195,247,.08); --stbg:rgba(232,213,163,.06);
+  --text:#f0f4ff; --sub:rgba(240,244,255,.52); --dim:rgba(240,244,255,.22);
+  --faint:rgba(240,244,255,.09); --glow:0 0 40px rgba(79,195,247,.12);
+  --red:#ef5350;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:18px;line-height:1.75;overflow-x:hidden;cursor:none}
+a{color:inherit;text-decoration:none}
+button{cursor:none;font-family:inherit;background:none;border:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--void)}
+::-webkit-scrollbar-thumb{background:rgba(79,195,247,.4)}
+
+/* CURSOR */
+#cur{position:fixed;z-index:9999;width:10px;height:10px;background:var(--plasma);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 18px var(--plasma),0 0 36px rgba(79,195,247,.3);transition:transform .1s,width .2s,height .2s}
+#cur-ring{position:fixed;z-index:9998;width:38px;height:38px;border:1px solid rgba(79,195,247,.35);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+
+/* CANVAS */
+#sky{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* PROGRESS BAR */
+#prog{position:fixed;top:0;left:0;z-index:201;height:2px;width:0%;background:linear-gradient(90deg,var(--plasma),var(--pulsar),var(--stellar));display:none;box-shadow:0 0 10px var(--plasma)}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 52px;background:rgba(3,5,10,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--rim2)}
+.n-brand{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--stellar);cursor:pointer;position:relative}
+.n-brand::after{content:'';position:absolute;bottom:-4px;left:0;width:100%;height:1px;background:linear-gradient(90deg,var(--plasma),transparent)}
+.n-links{display:flex;gap:36px;align-items:center;list-style:none}
+.nl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--sub);transition:color .25s;position:relative;padding-bottom:4px}
+.nl::before{content:'//';margin-right:5px;color:var(--plasma);opacity:0;transition:opacity .25s}
+.nl::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--plasma);transition:width .3s}
+.nl:hover,.nl.on{color:var(--text)}
+.nl:hover::before,.nl.on::before{opacity:1}
+.nl:hover::after,.nl.on::after{width:100%}
+.n-admin-btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;padding:9px 18px;border:1px solid rgba(79,195,247,.3);color:var(--plasma);transition:all .25s}
+.n-admin-btn:hover{background:var(--plbg);border-color:var(--plasma)}
+.n-admin-btn.out{border-color:rgba(239,83,80,.3);color:var(--red)}
+.n-admin-btn.out:hover{background:rgba(239,83,80,.07)}
+.hamburger{display:none;flex-direction:column;gap:5px;padding:4px}
+.hamburger span{width:20px;height:1.5px;background:var(--text);display:block;transition:.3s}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:1;min-height:100vh;padding-top:68px}
+.page.on{display:block}
+#p-home,#p-read,#p-paper{padding-top:0}
+
+/* HERO */
+#hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;padding:0 52px 88px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none;user-select:none;display:flex;align-items:center;justify-content:flex-end;padding-right:30px;font-family:'Bebas Neue',sans-serif;font-size:clamp(180px,28vw,400px);color:rgba(79,195,247,.025);letter-spacing:-10px;line-height:1;overflow:hidden}
+.hero-c{position:relative;z-index:2;max-width:820px}
+.hero-ey{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--plasma);margin-bottom:22px;display:flex;align-items:center;gap:16px;animation:fadeUp .9s ease both}
+.hero-ey::before{content:'';width:44px;height:1px;background:var(--plasma)}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(62px,9.5vw,132px);line-height:.9;letter-spacing:2px;color:#fff;margin-bottom:10px;animation:fadeUp .9s .1s ease both}
+.hero-h1 span{background:linear-gradient(135deg,var(--plasma) 0%,var(--pulsar) 50%,var(--stellar) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:20px;font-weight:300;font-style:italic;color:var(--sub);max-width:580px;line-height:1.8;margin-bottom:44px;animation:fadeUp .9s .2s ease both}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;animation:fadeUp .9s .3s ease both}
+.btn-plasma{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px 34px;background:var(--plasma);color:var(--void);border:none;font-weight:500;transition:all .25s;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.btn-plasma:hover{background:var(--pulsar);transform:translateY(-2px);box-shadow:0 8px 32px rgba(79,195,247,.35)}
+.btn-outline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px 34px;background:transparent;color:var(--text);border:1px solid var(--rim);transition:all .25s}
+.btn-outline:hover{border-color:var(--plasma);color:var(--plasma)}
+.hero-stats{position:absolute;right:52px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:32px;text-align:right;animation:fadeUp .9s .4s ease both}
+.hs-val{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--stellar);line-height:1}
+.hs-key{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+.hero-scroll{position:absolute;bottom:36px;left:52px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);animation:pulse 2.5s infinite}
+.hs-line{width:50px;height:1px;background:linear-gradient(90deg,var(--plasma),transparent)}
+
+/* SECTION HEADERS */
+.sec-hd{display:flex;align-items:baseline;gap:18px;margin-bottom:48px;padding-bottom:18px;border-bottom:1px solid var(--rim2)}
+.sec-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--plasma)}
+.sec-ttl{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,3.5vw,44px);letter-spacing:1px;color:#fff}
+.sec-ttl em{color:var(--plasma);font-style:normal}
+.sec-more{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--rim);padding-bottom:2px;transition:color .2s,border-color .2s;cursor:pointer}
+.sec-more:hover{color:var(--plasma);border-color:var(--plasma)}
+
+/* HOME SECTIONS */
+.h-sec{padding:80px 52px}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--rim2),transparent);margin:0 52px}
+
+/* CARD GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:2px;background:var(--rim2)}
+.card{background:var(--card);padding:36px;cursor:pointer;position:relative;overflow:hidden;transition:background .3s}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--plasma),var(--pulsar),transparent);transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.23,1,.32,1)}
+.card:hover{background:#0e1326}
+.card:hover::before{transform:scaleX(1)}
+.card-kicker{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--plasma);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-kicker::before{content:'//';opacity:.6}
+.card-ttl{font-family:'Crimson Pro',serif;font-size:22px;font-weight:600;line-height:1.3;color:#fff;margin-bottom:12px;transition:color .2s}
+.card:hover .card-ttl{color:var(--pulsar)}
+.card-exc{font-size:15px;color:var(--sub);line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:24px}
+.card-ft{display:flex;justify-content:space-between;align-items:center;padding-top:18px;border-top:1px solid var(--rim2);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim)}
+.card-arr{color:var(--sub);transition:color .2s,transform .25s;display:inline-block}
+.card:hover .card-arr{color:var(--plasma);transform:translateX(5px)}
+.card.feat{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:0}
+.feat-vis{background:radial-gradient(ellipse at 40% 60%,rgba(79,195,247,.07),transparent),radial-gradient(ellipse at 80% 20%,rgba(232,213,163,.05),transparent),var(--well);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,12vw,160px);color:rgba(79,195,247,.12);min-height:280px;border-right:1px solid var(--rim2);letter-spacing:4px}
+.feat-body{padding:48px}
+.feat-body .card-ttl{font-size:28px}
+
+/* PAPERS LIST */
+.plist{display:flex;flex-direction:column;gap:2px;background:var(--rim2)}
+.prow{background:var(--card);padding:28px 36px;display:grid;grid-template-columns:68px 1fr auto;gap:24px;align-items:start;cursor:pointer;transition:background .25s;position:relative}
+.prow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--plasma),var(--pulsar));transform:scaleY(0);transform-origin:top;transition:transform .4s cubic-bezier(.23,1,.32,1)}
+.prow:hover{background:#0e1326}
+.prow:hover::before{transform:scaleY(1)}
+.prow-yr{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--plasma);opacity:.35;line-height:1;padding-top:2px}
+.prow-ttl{font-family:'Crimson Pro',serif;font-size:21px;font-weight:600;color:#fff;margin-bottom:7px;line-height:1.3;transition:color .2s}
+.prow:hover .prow-ttl{color:var(--pulsar)}
+.prow-abs{font-size:14px;color:var(--sub);line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:10px}
+.prow-tags{display:flex;gap:6px;flex-wrap:wrap}
+.ptag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border:1px solid rgba(79,195,247,.18);color:rgba(79,195,247,.5)}
+.prow-side{text-align:right;padding-top:2px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.pcat{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--rim);color:var(--sub)}
+.pread{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--plasma);display:flex;align-items:center;gap:5px;transition:gap .2s}
+.prow:hover .pread{gap:9px}
+
+/* FULL PAGE */
+.fp{padding:80px 52px}
+.fp-hd{max-width:680px;margin-bottom:56px}
+.fp-ey{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--plasma);margin-bottom:16px}
+.fp-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,6vw,80px);letter-spacing:2px;color:#fff;margin-bottom:12px;line-height:.95}
+.fp-h1 em{color:var(--plasma);font-style:normal}
+.fp-desc{font-size:18px;color:var(--sub);font-style:italic;line-height:1.75}
+.controls{display:flex;gap:10px;margin-bottom:36px;flex-wrap:wrap;align-items:center}
+.sw{flex:1;min-width:220px;position:relative}
+.sw input{width:100%;background:var(--card);border:1px solid var(--rim);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;padding:11px 16px 11px 40px;outline:none;transition:border-color .25s}
+.sw input:focus{border-color:var(--plasma)}
+.sw input::placeholder{color:var(--dim)}
+.sw-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--plasma);font-size:14px}
+.ftags{display:flex;gap:6px;flex-wrap:wrap}
+.ftag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:7px 13px;border:1px solid var(--rim);background:none;color:var(--sub);transition:all .2s}
+.ftag.on,.ftag:hover{border-color:var(--plasma);color:var(--plasma);background:var(--plbg)}
+
+/* READ VIEW */
+.read-back{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--rim2);padding:76px 52px 0;transition:color .2s,border-color .2s;cursor:pointer}
+.read-back:hover{color:var(--plasma);border-color:var(--plasma)}
+
+/* ARTICLE HEADER */
+.art-hd{max-width:840px;margin:0 auto;padding:52px 52px 44px;border-bottom:1px solid var(--rim2);position:relative}
+.art-hd::before{content:'';position:absolute;left:52px;top:0;width:60px;height:2px;background:linear-gradient(90deg,var(--plasma),transparent)}
+.art-kicker{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--plasma);margin-bottom:22px;display:flex;align-items:center;gap:12px}
+.art-kicker::before{content:'';width:28px;height:1px;background:var(--plasma);opacity:.7}
+.art-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,80px);line-height:.95;letter-spacing:1px;color:#fff;margin-bottom:20px}
+.art-lead{font-size:22px;font-weight:300;font-style:italic;color:rgba(240,244,255,.6);line-height:1.75;margin-bottom:28px;max-width:680px}
+.art-meta{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.art-meta-dot{color:var(--plasma)}
+
+/* ABSTRACT BLOCK (papers only) */
+.abstract-block{max-width:840px;margin:0 auto;padding:36px 52px;border-bottom:1px solid var(--rim2);background:rgba(79,195,247,.025);position:relative}
+.abstract-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--plasma),rgba(128,222,234,.3),transparent)}
+.ab-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--plasma);margin-bottom:14px}
+.ab-text{font-size:18px;font-style:italic;color:var(--sub);line-height:1.9;border-left:none;padding:0}
+.ab-keywords{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}
+
+/* THE READING BODY */
+.art-body{max-width:700px;margin:0 auto;padding:60px 52px 100px;font-family:'Crimson Pro',serif;font-size:19.5px;line-height:1.95;color:rgba(240,244,255,.74)}
+.art-body > p:first-of-type::first-letter{font-family:'Bebas Neue',sans-serif;font-size:5em;line-height:.75;float:left;margin:.04em .12em -.02em 0;color:var(--plasma);text-shadow:0 0 20px rgba(79,195,247,.4)}
+.art-body p{margin-bottom:28px}
+.art-body h2{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:#fff;margin:60px 0 22px;padding-bottom:16px;border-bottom:1px solid var(--rim2);position:relative}
+.art-body h2::before{content:'';position:absolute;bottom:-1px;left:0;width:48px;height:1px;background:var(--plasma)}
+.art-body h3{font-family:'Crimson Pro',serif;font-size:26px;font-weight:600;font-style:italic;color:var(--text);margin:44px 0 16px}
+.art-body blockquote{border-left:3px solid var(--plasma);padding:20px 32px;margin:40px 0;background:rgba(79,195,247,.05);font-size:22px;font-style:italic;color:var(--text);line-height:1.7}
+.art-body strong{color:#fff;font-weight:600}
+.art-body em{color:var(--stellar);font-style:italic}
+.art-body ul,.art-body ol{padding-left:28px;margin-bottom:28px}
+.art-body li{margin-bottom:10px}
+.art-body code{font-family:'JetBrains Mono',monospace;font-size:14px;background:rgba(79,195,247,.08);color:var(--pulsar);padding:2px 8px}
+.art-body pre{background:var(--well);border:1px solid var(--rim);padding:26px;overflow-x:auto;margin:34px 0;font-family:'JetBrains Mono',monospace;font-size:13px}
+.art-body pre code{background:none;padding:0;color:rgba(240,244,255,.75)}
+.art-end{display:flex;align-items:center;gap:16px;margin-top:64px;padding-top:32px;border-top:1px solid var(--rim2);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+.art-end::before,.art-end::after{content:'';flex:1;height:1px;background:var(--rim2)}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:280px 1fr;gap:72px;align-items:start}
+.about-port{aspect-ratio:3/4;background:linear-gradient(160deg,#0e1426,#080b18);border:1px solid var(--rim);display:flex;align-items:center;justify-content:center;font-size:96px;position:sticky;top:88px;overflow:hidden}
+.about-port::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(79,195,247,.08),transparent 70%)}
+.about-p{font-size:17px;color:var(--sub);line-height:1.9;margin-bottom:18px}
+.about-lead{font-size:24px;font-weight:300;font-style:italic;color:var(--text);line-height:1.65;margin-bottom:36px;padding-bottom:36px;border-bottom:1px solid var(--rim2)}
+.about-h3{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#fff;margin:44px 0 20px}
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:40px}
+.int{padding:18px;border:1px solid var(--rim);background:var(--card);transition:border-color .25s,background .25s}
+.int:hover{border-color:rgba(79,195,247,.25);background:var(--well)}
+.int-ico{font-size:20px;margin-bottom:8px}
+.int-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--plasma);margin-bottom:5px}
+.int-d{font-size:13px;color:var(--dim)}
+.tl{position:relative;padding-left:28px}
+.tl::before{content:'';position:absolute;left:0;top:8px;bottom:0;width:1px;background:linear-gradient(var(--plasma),transparent)}
+.tl-item{position:relative;margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--rim2)}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{position:absolute;left:-33px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--plasma);box-shadow:0 0 8px var(--plasma)}
+.tl-yr{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--plasma);margin-bottom:5px}
+.tl-ttl{font-family:'Crimson Pro',serif;font-size:19px;font-weight:600;color:#fff;margin-bottom:4px}
+.tl-d{font-size:14px;color:var(--sub)}
+
+/* CONTACT */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.c-intro{font-size:18px;color:var(--sub);line-height:1.9;font-style:italic;margin-bottom:36px}
+.c-links{display:flex;flex-direction:column;gap:2px;background:var(--rim2)}
+.c-link{background:var(--card);display:flex;align-items:center;gap:18px;padding:20px 24px;transition:background .2s}
+.c-link:hover{background:var(--well)}
+.c-ico{width:42px;height:42px;border:1px solid var(--rim);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:border-color .2s}
+.c-link:hover .c-ico{border-color:var(--plasma)}
+.c-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--plasma);margin-bottom:3px}
+.c-val{font-size:14px;color:var(--sub)}
+.cf-ttl{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1.5px;color:#fff;margin-bottom:4px}
+.cf-s{font-size:14px;color:var(--sub);margin-bottom:26px}
+.cf-g{margin-bottom:16px}
+.cf-l{display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.cf-i,.cf-ta{width:100%;background:var(--card);border:1px solid var(--rim);color:var(--text);font-family:'Crimson Pro',serif;font-size:16px;padding:12px 15px;outline:none;transition:border-color .25s}
+.cf-i:focus,.cf-ta:focus{border-color:var(--plasma)}
+.cf-i::placeholder,.cf-ta::placeholder{color:var(--dim)}
+.cf-ta{resize:vertical;min-height:110px}
+
+/* ADMIN */
+#p-admin{padding-top:68px}
+.adm-wrap{display:grid;grid-template-columns:244px 1fr;min-height:calc(100vh - 68px)}
+.adm-sb{background:var(--deep);border-right:1px solid var(--rim2);padding:36px 0;position:sticky;top:68px;height:calc(100vh - 68px);overflow-y:auto}
+.adm-sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--plasma);padding:0 24px 14px;border-bottom:1px solid var(--rim2);margin-bottom:12px}
+.adm-item{display:flex;align-items:center;gap:12px;padding:13px 24px;width:100%;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);transition:all .2s}
+.adm-item:hover{color:var(--text);background:rgba(255,255,255,.02)}
+.adm-item.on{color:var(--plasma);background:var(--plbg)}
+.adm-item-ico{font-size:14px;width:18px;text-align:center}
+.adm-main{padding:48px;background:var(--void)}
+.adm-pnl{display:none}
+.adm-pnl.on{display:block}
+.adm-pttl{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:#fff;margin-bottom:4px}
+.adm-psub{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--plasma);margin-bottom:36px}
+.adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--rim2);margin-bottom:36px}
+.adm-stat{background:var(--card);padding:26px;text-align:center}
+.adm-sv{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--plasma);line-height:1;margin-bottom:8px}
+.adm-sk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+.af-g{margin-bottom:20px}
+.af-l{display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.af-i,.af-ta,.af-sel{width:100%;background:var(--card);border:1px solid var(--rim);color:var(--text);font-family:'Crimson Pro',serif;font-size:17px;padding:13px 16px;outline:none;transition:border-color .25s}
+.af-i:focus,.af-ta:focus,.af-sel:focus{border-color:var(--plasma)}
+.af-i::placeholder,.af-ta::placeholder{color:var(--dim)}
+.af-ta{resize:vertical;min-height:110px;line-height:1.75}
+.af-sel{appearance:none;cursor:pointer}
+.af-sel option{background:var(--card)}
+.af-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.et{display:flex;gap:3px;flex-wrap:wrap;background:var(--card);border:1px solid var(--rim);border-bottom:none;padding:7px 10px}
+.tb{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 8px;border:1px solid transparent;background:none;color:var(--sub);transition:all .2s}
+.tb:hover{border-color:var(--rim);color:var(--text)}
+.tb-sep{width:1px;background:var(--rim);margin:0 3px;align-self:stretch}
+.ed{width:100%;background:var(--card);border:1px solid var(--rim);color:var(--text);font-family:'Crimson Pro',serif;font-size:18px;line-height:1.8;padding:20px;outline:none;min-height:300px;transition:border-color .25s}
+.ed:focus{border-color:var(--plasma)}
+.ed[placeholder]:empty::before{content:attr(placeholder);color:var(--dim)}
+.af-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px 38px;background:var(--plasma);color:var(--void);border:none;font-weight:500;transition:all .25s;margin-top:12px;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.af-sub:hover{background:var(--pulsar);box-shadow:0 6px 20px rgba(79,195,247,.25)}
+.adm-list{display:flex;flex-direction:column;gap:2px;background:var(--rim2);margin-top:24px}
+.adm-li{background:var(--card);display:flex;align-items:flex-start;gap:18px;padding:18px 22px;transition:background .2s}
+.adm-li:hover{background:var(--well)}
+.ali-ttl{flex:1;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;color:#fff;margin-bottom:4px}
+.ali-m{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.ali-acts{display:flex;gap:6px;flex-shrink:0}
+.ali-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:6px 11px;border:1px solid var(--rim);color:var(--sub);transition:all .2s}
+.ali-btn:hover{border-color:var(--plasma);color:var(--plasma)}
+.ali-btn.del:hover{border-color:var(--red);color:var(--red)}
+
+/* LOGIN */
+#login-ov{position:fixed;inset:0;z-index:200;background:rgba(3,5,10,.94);backdrop-filter:blur(24px);display:none;align-items:center;justify-content:center}
+#login-ov.show{display:flex}
+.lb{width:100%;max-width:420px;background:var(--card);border:1px solid var(--rim);padding:48px;position:relative}
+.lb::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--plasma),var(--pulsar),transparent)}
+.lb-ttl{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:#fff;margin-bottom:4px}
+.lb-sub{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--plasma);margin-bottom:32px}
+.lb-err{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--red);background:rgba(239,83,80,.08);border:1px solid rgba(239,83,80,.22);padding:12px 14px;margin-bottom:18px;display:none}
+.lb-err.show{display:block}
+.lb-close{position:absolute;top:14px;right:14px;border:1px solid var(--rim);color:var(--sub);width:30px;height:30px;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.lb-close:hover{border-color:var(--red);color:var(--red)}
+
+/* FOOTER */
+footer{position:relative;z-index:1;background:var(--deep);border-top:1px solid var(--rim2)}
+.ft-top{padding:60px 52px 40px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:44px}
+.ft-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--stellar);margin-bottom:12px}
+.ft-tag{font-size:14px;color:var(--sub);line-height:1.75}
+.ft-ct{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--plasma);margin-bottom:16px}
+.ft-links{display:flex;flex-direction:column;gap:9px}
+.ft-link{font-size:14px;color:var(--sub);transition:color .2s;cursor:pointer}
+.ft-link:hover{color:var(--text)}
+.ft-bot{padding:22px 52px;border-top:1px solid var(--rim2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.ft-copy{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim)}
+.ft-clk{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(79,195,247,.3)}
+
+/* TOAST + EMPTY */
+.toast{position:fixed;bottom:28px;right:28px;z-index:300;background:var(--card);border-left:2px solid var(--plasma);padding:14px 22px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.5),var(--glow);transform:translateX(130%);transition:transform .4s cubic-bezier(.23,1,.32,1);max-width:320px}
+.toast.show{transform:translateX(0)}
+.toast.err{border-color:var(--red)}
+.empty{text-align:center;padding:72px 32px;border:1px dashed rgba(79,195,247,.12);background:var(--card)}
+.empty-ico{font-size:44px;margin-bottom:16px;opacity:.25}
+.empty-txt{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:20px}
+
+/* ── PAPER COVER IMAGE on detail page ── */
+.paper-cover{
+  width:100%;max-width:840px;margin:0 auto;
+  position:relative;overflow:hidden;
+  height:clamp(220px,32vw,420px);
+  border-bottom:1px solid var(--rim2);
+}
+.paper-cover img{
+  width:100%;height:100%;object-fit:cover;
+  display:block;filter:brightness(.55) saturate(1.15);
+  transition:transform 6s ease;
+}
+.paper-cover:hover img{transform:scale(1.04)}
+.paper-cover-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(3,5,10,.92) 0%,rgba(3,5,10,.3) 60%,transparent 100%);
+}
+.paper-cover-badge{
+  position:absolute;top:24px;left:52px;
+  font-family:'JetBrains Mono',monospace;font-size:8px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--plasma);background:rgba(3,5,10,.7);
+  border:1px solid rgba(79,195,247,.3);
+  padding:5px 12px;backdrop-filter:blur(8px);
+}
+.paper-cover-placeholder{
+  width:100%;max-width:840px;margin:0 auto;
+  height:4px;
+  background:linear-gradient(90deg,var(--plasma),var(--pulsar),var(--stellar),transparent);
+}
+
+/* ── 3-COL PAPER CARDS on listing pages ── */
+.pgrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;background:var(--rim2);
+}
+.pcard{
+  background:var(--card);cursor:pointer;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:background .3s;
+}
+.pcard::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--plasma),var(--pulsar),transparent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s cubic-bezier(.23,1,.32,1);
+}
+.pcard:hover{background:#0e1326}
+.pcard:hover::after{transform:scaleX(1)}
+
+/* cover thumb inside card */
+.pcard-img{
+  width:100%;height:180px;overflow:hidden;
+  position:relative;background:var(--well);
+  border-bottom:1px solid var(--rim2);
+  flex-shrink:0;
+}
+.pcard-img img{
+  width:100%;height:100%;object-fit:cover;
+  filter:brightness(.6) saturate(1.1);
+  transition:transform .5s ease,filter .4s;
+}
+.pcard:hover .pcard-img img{transform:scale(1.07);filter:brightness(.75) saturate(1.3)}
+.pcard-img-ph{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:64px;
+  color:rgba(79,195,247,.1);letter-spacing:4px;
+  background:radial-gradient(ellipse at 50% 60%,rgba(79,195,247,.05),transparent);
+}
+.pcard-img-yr{
+  position:absolute;bottom:10px;right:12px;
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  color:rgba(255,255,255,.18);letter-spacing:2px;
+}
+
+.pcard-body{padding:26px 28px 24px;display:flex;flex-direction:column;flex:1}
+.pcard-kicker{
+  font-family:'JetBrains Mono',monospace;font-size:8px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--plasma);margin-bottom:12px;
+  display:flex;align-items:center;gap:7px;
+}
+.pcard-kicker::before{content:'//';opacity:.5}
+.pcard-ttl{
+  font-family:'Crimson Pro',serif;font-size:19px;
+  font-weight:600;line-height:1.28;color:#fff;
+  margin-bottom:10px;transition:color .2s;
+}
+.pcard:hover .pcard-ttl{color:var(--pulsar)}
+.pcard-abs{
+  font-size:13.5px;color:var(--sub);line-height:1.7;
+  display:-webkit-box;-webkit-line-clamp:3;
+  -webkit-box-orient:vertical;overflow:hidden;
+  margin-bottom:18px;flex:1;
+}
+.pcard-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px}
+.pcard-ft{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:16px;border-top:1px solid var(--rim2);
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;
+  letter-spacing:1px;color:var(--dim);
+}
+.pcard-arr{color:var(--plasma);display:inline-block;transition:transform .25s}
+.pcard:hover .pcard-arr{transform:translateX(5px)}
+
+/* ── 4 DARK STAT BOXES ── */
+.stat-boxes{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2px;background:var(--rim2);
+  margin:0 0 0 0;
+}
+.sbox{
+  background:var(--deep);
+  padding:40px 32px;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  min-height:180px;
+  border-bottom:none;
+  transition:background .3s;
+}
+.sbox::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--plasma),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.sbox:hover{background:#07091a}
+.sbox:hover::before{opacity:1}
+.sbox-bg{
+  position:absolute;bottom:-20px;right:-10px;
+  font-family:'Bebas Neue',sans-serif;font-size:100px;
+  color:rgba(79,195,247,.04);letter-spacing:-4px;line-height:1;
+  pointer-events:none;user-select:none;
+}
+.sbox-ico{font-size:22px;margin-bottom:16px;opacity:.7}
+.sbox-val{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;color:var(--stellar);
+  line-height:1;margin-bottom:8px;
+}
+.sbox-key{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--dim);
+}
+.sbox-sub{
+  font-size:12px;color:var(--dim);margin-top:12px;
+  font-style:italic;border-top:1px solid var(--rim2);
+  padding-top:12px;
+}
+
+/* ── RESPONSIVE for new elements ── */
+@media(max-width:900px){
+  .pgrid{grid-template-columns:1fr 1fr}
+  .stat-boxes{grid-template-columns:1fr 1fr}
+  .paper-cover-badge{left:24px}
+}
+@media(max-width:580px){
+  .pgrid{grid-template-columns:1fr}
+  .stat-boxes{grid-template-columns:1fr 1fr}
+}
+
+/* ── ASK PAGE ── */
+.ask-wrap{
+  position:relative;overflow:hidden;
+  background:var(--deep);border:1px solid var(--rim);
+  padding:56px 52px 48px;
+  max-width:860px;
+}
+.ask-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--plasma),var(--pulsar),transparent)}
+.ask-orb{
+  position:absolute;width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,195,247,.07),transparent 70%);
+  right:-80px;top:-80px;pointer-events:none;
+}
+.ask-orb2{
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(232,213,163,.05),transparent 70%);
+  left:-40px;bottom:-60px;right:auto;top:auto;
+}
+.ask-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:4px;text-transform:uppercase;color:var(--plasma);
+  margin-bottom:20px;
+}
+.ask-bar-wrap{display:flex;gap:0;align-items:stretch;position:relative}
+.ask-textarea{
+  flex:1;background:rgba(7,10,20,.8);border:1px solid rgba(79,195,247,.22);
+  border-right:none;
+  color:var(--text);font-family:'Crimson Pro',serif;
+  font-size:19px;line-height:1.7;
+  padding:22px 28px;outline:none;resize:none;
+  transition:border-color .3s;
+  min-height:120px;
+}
+.ask-textarea:focus{border-color:var(--plasma)}
+.ask-textarea::placeholder{color:var(--dim);font-style:italic}
+.ask-btn{
+  background:var(--plasma);color:var(--void);
+  border:none;padding:0 36px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;transition:all .25s;flex-shrink:0;min-width:90px;
+  clip-path:polygon(0 0,100% 0,100% 100%,12px 100%,0 calc(100% - 12px));
+}
+.ask-btn:hover{background:var(--pulsar);box-shadow:0 0 30px rgba(79,195,247,.3)}
+.ask-btn-txt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;font-weight:500}
+.ask-btn-ico{font-size:18px;font-weight:300}
+.ask-hint{
+  margin-top:12px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:1.5px;color:var(--dim);
+}
+.ask-hint kbd{
+  background:var(--rim);border:1px solid rgba(255,255,255,.1);
+  padding:2px 6px;font-size:8px;color:var(--sub);
+}
+/* recent questions list */
+.qlist{display:flex;flex-direction:column;gap:2px;background:var(--rim2)}
+.qrow{
+  background:var(--card);padding:24px 32px;
+  position:relative;transition:background .2s;
+}
+.qrow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--plasma);opacity:.4}
+.qrow-txt{font-family:'Crimson Pro',serif;font-size:18px;color:var(--text);line-height:1.65;font-style:italic;margin-bottom:8px}
+.qrow-meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+/* admin inbox */
+.q-inbox-row{
+  background:var(--card);padding:22px 28px;
+  display:flex;align-items:flex-start;gap:18px;
+  transition:background .2s;position:relative;
+}
+.q-inbox-row.unread{border-left:2px solid var(--plasma)}
+.q-inbox-row.read{border-left:2px solid var(--rim)}
+.q-inbox-row:hover{background:var(--well)}
+.qi-txt{flex:1;font-family:'Crimson Pro',serif;font-size:17px;color:var(--text);line-height:1.6;margin-bottom:5px}
+.qi-meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.qi-badge{
+  font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 8px;border:1px solid rgba(79,195,247,.3);color:var(--plasma);flex-shrink:0;
+}
+.qi-badge.read-badge{border-color:var(--rim);color:var(--dim)}
+
+/* ── PAPER COLLAGE LAYOUT (3+ papers) ── */
+.pcollage{
+  display:grid;
+  gap:2px;background:var(--rim2);
+}
+.pcollage.c1{grid-template-columns:1fr}
+.pcollage.c2{grid-template-columns:1fr 1fr}
+.pcollage.c3{
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto auto;
+}
+.pcollage.c3 .pcard:first-child{grid-column:1/-1}
+.pcollage.c4{grid-template-columns:1fr 1fr}
+.pcollage.c5{
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:auto auto;
+}
+.pcollage.c5 .pcard:nth-child(1),
+.pcollage.c5 .pcard:nth-child(2){grid-row:1}
+.pcollage.c5 .pcard:nth-child(1){grid-column:1/3}
+.pcollage.many{grid-template-columns:repeat(3,1fr)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .ask-wrap{padding:32px 24px}
+  .ask-bar-wrap{flex-direction:column}
+  .ask-textarea{border-right:1px solid rgba(79,195,247,.22);border-bottom:none}
+  .ask-btn{padding:18px;clip-path:none;flex-direction:row;min-width:auto}
+  .pcollage.c3,.pcollage.c5,.pcollage.many{grid-template-columns:1fr 1fr}
+  .pcollage.c3 .pcard:first-child{grid-column:1/-1}
+  .pcollage.c5 .pcard:nth-child(1){grid-column:1/-1}
+}
+@media(max-width:580px){
+  .pcollage{grid-template-columns:1fr!important}
+  .pcollage .pcard{grid-column:auto!important}
+}
+
+/* ── HOME TYPEWRITER SEARCH BAR ── */
+.home-ask{
+  padding:0 52px 72px;
+  position:relative;
+}
+.home-ask-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:4px;text-transform:uppercase;color:var(--plasma);
+  margin-bottom:18px;display:flex;align-items:center;gap:12px;
+}
+.home-ask-label::before{content:'';width:28px;height:1px;background:var(--plasma)}
+.home-ask-bar{
+  display:flex;align-items:stretch;
+  border:1px solid rgba(79,195,247,.2);
+  background:rgba(7,10,20,.7);
+  position:relative;
+  transition:border-color .3s,box-shadow .3s;
+}
+.home-ask-bar:focus-within{
+  border-color:var(--plasma);
+  box-shadow:0 0 0 1px rgba(79,195,247,.15),0 8px 40px rgba(79,195,247,.08);
+}
+.home-ask-bar::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(79,195,247,.4),transparent);
+  pointer-events:none;
+}
+.home-ask-prefix{
+  display:flex;align-items:center;padding:0 20px;
+  font-family:'JetBrains Mono',monospace;font-size:14px;
+  color:var(--plasma);letter-spacing:2px;
+  border-right:1px solid rgba(79,195,247,.12);
+  flex-shrink:0;user-select:none;
+}
+#home-q{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text);
+  font-family:'Crimson Pro',serif;font-size:20px;
+  line-height:1.5;padding:22px 24px;
+  caret-color:var(--plasma);
+}
+#home-q::placeholder{color:var(--dim);font-style:italic}
+.home-ask-send{
+  background:transparent;border:none;
+  padding:0 28px;
+  display:flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--plasma);border-left:1px solid rgba(79,195,247,.12);
+  transition:all .25s;flex-shrink:0;
+}
+.home-ask-send:hover{background:var(--plbg);color:#fff}
+.home-ask-send-arrow{font-size:16px;transition:transform .25s}
+.home-ask-send:hover .home-ask-send-arrow{transform:translateX(4px)}
+.home-ask-hint{
+  margin-top:11px;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;
+  letter-spacing:1.5px;color:var(--dim);
+  display:flex;align-items:center;gap:14px;
+}
+.home-ask-hint span{display:flex;align-items:center;gap:5px}
+/* typewriter cursor blink */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.tw-cursor{
+  display:inline-block;width:2px;height:1.1em;
+  background:var(--plasma);vertical-align:text-bottom;
+  animation:blink .9s step-end infinite;margin-left:2px;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .home-ask{padding:0 24px 52px}
+  .home-ask-prefix{display:none}
+  .home-ask-send span:first-child{display:none}
+}
+
+/* REVEAL + ANIMATIONS */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
+.rv.in{opacity:1;transform:translateY(0)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:.75}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #nav{padding:0 24px}
+  .n-links{display:none}
+  .n-links.open{display:flex;flex-direction:column;position:fixed;top:68px;left:0;right:0;background:rgba(3,5,10,.98);padding:24px;gap:20px;border-bottom:1px solid var(--rim2);z-index:89}
+  .hamburger{display:flex}
+  #hero,.fp,.h-sec{padding-left:24px;padding-right:24px}
+  .hero-stats{display:none}
+  .card.feat{grid-template-columns:1fr}
+  .feat-vis{display:none}
+  .about-grid,.cg{grid-template-columns:1fr}
+  .about-port{display:none}
+  .adm-wrap{grid-template-columns:1fr}
+  .adm-sb{position:static;height:auto}
+  .adm-stats{grid-template-columns:1fr 1fr}
+  .af-row{grid-template-columns:1fr}
+  .prow{grid-template-columns:1fr}
+  .prow-side{flex-direction:row;align-items:center}
+  .art-hd,.abstract-block,.art-body{padding-left:24px;padding-right:24px}
+  .read-back{padding-left:24px}
+  .ft-top{grid-template-columns:1fr 1fr}
+  .ft-bot{padding:18px 24px}
+  .int-grid{grid-template-columns:1fr}
+  .div{margin:0 24px}
+  body{cursor:auto}
+  #cur,#cur-ring{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<canvas id="sky"></canvas>
+<div id="prog"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="n-brand" onclick="go('home')">DHS COSMOLOGY</div>
+  <ul class="n-links" id="nlinks">
+    <li><a class="nl on" onclick="go('home')">Home</a></li>
+    <li><a class="nl" onclick="go('papers')">Papers</a></li>
+    <li><a class="nl" onclick="go('about')">About</a></li>
+    <li><a class="nl" onclick="go('contact')">Contact</a></li>
+  </ul>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="n-admin-btn" id="adminBtn" onclick="onAdminClick()">Admin</button>
+    <button class="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="p-home" class="page on">
+  <section id="hero">
+    <div class="hero-bg">COSMOS</div>
+    <div class="hero-c">
+      <div class="hero-ey">Astronomy · Cosmology · Speculation</div>
+      <h1 class="hero-h1">DHS<br><span>COSMOLOGY</span></h1>
+      <p class="hero-desc">Research, essays and speculative writing at the frontier of modern cosmology by <em style="-webkit-text-fill-color:var(--stellar);color:var(--stellar)">Daniyal</em> — dark energy, quantum gravity, the deep structure of spacetime.</p>
+      <div class="hero-btns">
+        <button class="btn-plasma" onclick="go('papers')">Research Papers</button>
+        <button class="btn-outline" onclick="document.getElementById('home-q').scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('home-q').focus(),600)">Ask a Question</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hs-val" id="hn-papers">0</div><div class="hs-key">Papers</div></div>
+      <div><div class="hs-val" id="hn-questions">0</div><div class="hs-key">Questions Asked</div></div>
+      <div><div class="hs-val">13.8B</div><div class="hs-key">Yrs of Universe</div></div>
+    </div>
+    <div class="hero-scroll"><div class="hs-line"></div><span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px">Explore</span></div>
+  </section>
+  <!-- TYPEWRITER ASK BAR — above papers -->
+  <section class="h-sec" style="padding-bottom:16px;padding-top:44px">
+    <div class="sec-hd rv"><span class="sec-lbl">Curious?</span><h2 class="sec-ttl">ASK A <em>QUESTION</em></h2></div>
+  </section>
+  <div class="home-ask rv" style="padding-top:0">
+    <div class="home-ask-label">Ask Daniyal Anything</div>
+    <div class="home-ask-bar">
+      <div class="home-ask-prefix">// Q</div>
+      <input id="home-q" type="text" autocomplete="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter')submitHomeQ()"
+        onfocus="startTypewriter()" onblur="stopTypewriter()">
+      <button class="home-ask-send" onclick="submitHomeQ()">
+        <span>Send</span>
+        <span class="home-ask-send-arrow">→</span>
+      </button>
+    </div>
+    <div class="home-ask-hint">
+      <span>⏎ Press Enter to send</span>
+      <span>· Anonymous · No email needed</span>
+    </div>
+  </div>
+
+  <section class="h-sec" style="padding-top:0">
+    <div class="sec-hd rv"><span class="sec-lbl">Academic Work</span><h2 class="sec-ttl">RESEARCH <em>PAPERS</em></h2><span class="sec-more" onclick="go('papers')">All papers →</span></div>
+    <div id="home-papers"></div>
+  </section>
+
+  <!-- 4 DARK STAT BOXES -->
+  <div class="div"></div>
+  <section class="h-sec" style="padding-top:60px;padding-bottom:0">
+    <div class="sec-hd rv"><span class="sec-lbl">At a Glance</span><h2 class="sec-ttl">THE <em>NUMBERS</em></h2></div>
+  </section>
+  <div style="padding:0 52px 80px">
+    <div class="stat-boxes">
+      <div class="sbox rv">
+        <div class="sbox-bg" id="sb-r-bg">0</div>
+        <div><div class="sbox-ico">🔭</div><div class="sbox-val" id="sb-papers">0</div><div class="sbox-key">Research Papers</div></div>
+        <div class="sbox-sub">Peer-reviewed &amp; preprints</div>
+      </div>
+      <div class="sbox rv">
+        <div class="sbox-bg" id="sb-q-bg">0</div>
+        <div><div class="sbox-ico">💬</div><div class="sbox-val" id="sb-questions">0</div><div class="sbox-key">Questions Asked</div></div>
+        <div class="sbox-sub">From curious minds</div>
+      </div>
+      <div class="sbox rv">
+        <div class="sbox-bg">13.8B</div>
+        <div><div class="sbox-ico">🌌</div><div class="sbox-val">13.8B</div><div class="sbox-key">Years of Universe</div></div>
+        <div class="sbox-sub">Age of the cosmos we study</div>
+      </div>
+      <div class="sbox rv">
+        <div class="sbox-bg">∞</div>
+        <div><div class="sbox-ico">⚛️</div><div class="sbox-val">∞</div><div class="sbox-key">Open Questions</div></div>
+        <div class="sbox-sub">The frontier never closes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ASK A QUESTION -->
+<div id="p-ask" class="page">
+  <div class="fp">
+    <div class="fp-hd rv">
+      <div class="fp-ey">Curious? Ask Freely</div>
+      <h1 class="fp-h1">ASK A <em>QUESTION</em></h1>
+      <p class="fp-desc">No email required. Ask anything about cosmology, my research, or the universe — Daniyal reads every question personally from the admin panel.</p>
+    </div>
+    <!-- SEARCH-BAR STYLE ASK BOX -->
+    <div class="ask-wrap rv">
+      <div class="ask-orb"></div>
+      <div class="ask-orb ask-orb2"></div>
+      <div class="ask-inner">
+        <div class="ask-label">// YOUR QUESTION</div>
+        <div class="ask-bar-wrap">
+          <textarea id="ask-q" class="ask-textarea" placeholder="What is dark energy really? How does time behave near a black hole? What keeps you up at night…" rows="4"></textarea>
+          <button class="ask-btn" onclick="submitQuestion()">
+            <span class="ask-btn-txt">SEND</span>
+            <span class="ask-btn-ico">→</span>
+          </button>
+        </div>
+        <div class="ask-hint">Press Send or <kbd>Ctrl+Enter</kbd> · Anonymous · No account needed</div>
+      </div>
+    </div>
+    <!-- RECENT QUESTIONS (public display, no answers shown) -->
+    <div style="margin-top:72px">
+      <div class="sec-hd rv"><span class="sec-lbl">From the Community</span><h2 class="sec-ttl">RECENT <em>QUESTIONS</em></h2></div>
+      <div id="ask-recent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAPERS -->
+<div id="p-papers" class="page">
+  <div class="fp">
+    <div class="fp-hd rv"><div class="fp-ey">Academic Work</div><h1 class="fp-h1">RESEARCH <em>PAPERS</em></h1><p class="fp-desc">Published papers and ongoing research in astronomy and modern cosmology — written to be read, not downloaded.</p></div>
+    <div class="controls"><div class="sw"><span class="sw-ico">⌕</span><input type="text" id="ps" placeholder="Search papers…" oninput="renderPapers()"></div><div class="ftags" id="pfltrs"></div></div>
+    <div class="pgrid" id="papers-list"></div>
+  </div>
+</div>
+
+<!-- SINGLE PAPER -->
+<div id="p-paper" class="page">
+  <div class="read-back" id="paper-back">← Back to Papers</div>
+  <div id="paper-cover-wrap"></div>
+  <div class="art-hd" id="paper-hd"></div>
+  <div class="abstract-block" id="paper-abstract"></div>
+  <div class="art-body" id="paper-bd"></div>
+</div>
+
+<!-- ABOUT -->
+<div id="p-about" class="page">
+  <div class="fp">
+    <div class="about-grid">
+      <div class="about-port">🌠</div>
+      <div>
+        <div class="fp-ey rv">Astronomer · Writer · Theorist</div>
+        <h1 class="fp-h1 rv">DANIYAL<br><em>DHS COSMOLOGY</em></h1>
+        <p class="about-lead rv">"We are a way for the cosmos to know itself — and I have devoted my work to deepening that knowing."</p>
+        <p class="about-p rv">I am an independent researcher and writer working at the frontier of modern cosmology. My work brings together rigorous mathematics, observational data, and bold speculative thinking to probe the deepest questions about our universe.</p>
+        <p class="about-p rv">From dark energy to quantum gravity, black hole thermodynamics to the topology of spacetime — I pursue the questions that lie just beyond what current physics can comfortably answer.</p>
+        <p class="about-p rv">DHS Cosmology is my public archive: papers, essays, and speculations shared openly with the scientific community and curious minds everywhere.</p>
+        <h3 class="about-h3 rv">Research Interests</h3>
+        <div class="int-grid">
+          <div class="int rv"><div class="int-ico">🌑</div><div class="int-t">Dark Energy</div><div class="int-d">Cosmological constant and accelerating expansion</div></div>
+          <div class="int rv"><div class="int-ico">🕳️</div><div class="int-t">Black Holes</div><div class="int-d">Information paradox and horizon thermodynamics</div></div>
+          <div class="int rv"><div class="int-ico">⚛️</div><div class="int-t">Quantum Gravity</div><div class="int-d">Reconciling GR with quantum field theory</div></div>
+          <div class="int rv"><div class="int-ico">🌐</div><div class="int-t">Large-Scale Structure</div><div class="int-d">Cosmic topology and CMB anomalies</div></div>
+          <div class="int rv"><div class="int-ico">🔭</div><div class="int-t">Observational Cosmology</div><div class="int-d">JWST, gravitational waves, new windows</div></div>
+          <div class="int rv"><div class="int-ico">📐</div><div class="int-t">Mathematical Physics</div><div class="int-d">Differential geometry and spacetime language</div></div>
+        </div>
+        <h3 class="about-h3 rv">Timeline</h3>
+        <div class="tl">
+          <div class="tl-item rv"><div class="tl-dot"></div><div class="tl-yr">Present</div><div class="tl-ttl">Independent Researcher & Writer</div><div class="tl-d">Publishing papers, essays and speculative work on this site</div></div>
+          <div class="tl-item rv"><div class="tl-dot"></div><div class="tl-yr">2022 —</div><div class="tl-ttl">Dark Energy Models</div><div class="tl-d">Developing theoretical frameworks for Λ variations</div></div>
+          <div class="tl-item rv"><div class="tl-dot"></div><div class="tl-yr">2019 —</div><div class="tl-ttl">Quantum Gravity Phenomenology</div><div class="tl-d">Investigating observational signatures of quantum spacetime</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div id="p-contact" class="page">
+  <div class="fp">
+    <div class="fp-hd rv"><div class="fp-ey">Get in Touch</div><h1 class="fp-h1">CONTACT <em>ME</em></h1><p class="fp-desc">For collaboration, correspondence, or cosmological conversation.</p></div>
+    <div class="cg">
+      <div>
+        <p class="c-intro">Whether you have a research question, want to discuss a speculative idea, or are interested in collaboration — I would love to hear from you.</p>
+        <div class="c-links">
+          <a class="c-link" href="mailto:daniyalhasan727@gmail.com"><div class="c-ico">✉</div><div><div class="c-label">Email</div><div class="c-val">daniyalhasan727@gmail.com</div></div></a>
+          <a class="c-link" href="https://arxiv.org" target="_blank"><div class="c-ico">📄</div><div><div class="c-label">arXiv</div><div class="c-val">arxiv.org/a/daniyal_hasan</div></div></a>
+          <a class="c-link" href="https://orcid.org" target="_blank"><div class="c-ico">🔬</div><div><div class="c-label">ORCID</div><div class="c-val">dhs-cosmology.orcid.org</div></div></a>
+          <a class="c-link" href="https://scholar.google.com" target="_blank"><div class="c-ico">🎓</div><div><div class="c-label">Google Scholar</div><div class="c-val">DHS Cosmology Publications</div></div></a>
+          <a class="c-link" href="https://instagram.com/daniyalhasanshaikh" target="_blank"><div class="c-ico">📸</div><div><div class="c-label">Instagram</div><div class="c-val">@daniyalhasanshaikh</div></div></a>
+        </div>
+      </div>
+      <div>
+        <div class="cf-ttl">SEND A MESSAGE</div>
+        <div class="cf-s">I respond within a few days</div>
+        <div class="cf-g"><label class="cf-l">Your Name</label><input class="cf-i" type="text" placeholder="Full name"></div>
+        <div class="cf-g"><label class="cf-l">Email</label><input class="cf-i" type="email" placeholder="your@email.com"></div>
+        <div class="cf-g"><label class="cf-l">Subject</label><input class="cf-i" type="text" placeholder="Research, collaboration…"></div>
+        <div class="cf-g"><label class="cf-l">Message</label><textarea class="cf-ta" placeholder="Your message…"></textarea></div>
+        <button class="btn-plasma" onclick="toast('Message sent to daniyalhasan727@gmail.com!')">Send Message</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="p-admin" class="page">
+  <div class="adm-wrap">
+    <aside class="adm-sb">
+      <div class="adm-sb-lbl">Admin Panel</div>
+      <button class="adm-item on" onclick="swp('dash',this)"><span class="adm-item-ico">📊</span>Dashboard</button>
+      <button class="adm-item" onclick="swp('inbox',this)"><span class="adm-item-ico">💬</span>Questions Inbox</button>
+      <button class="adm-item" onclick="swp('new-paper',this)"><span class="adm-item-ico">🔭</span>Write Paper</button>
+      <button class="adm-item" onclick="swp('all-papers',this)"><span class="adm-item-ico">🗂️</span>All Papers</button>
+    </aside>
+    <main class="adm-main">
+      <div class="adm-pnl on" id="pnl-dash">
+        <div class="adm-pttl">Dashboard</div><div class="adm-psub">// OVERVIEW</div>
+        <div class="adm-stats">
+          <div class="adm-stat"><div class="adm-sv" id="ds-r">0</div><div class="adm-sk">Papers</div></div>
+          <div class="adm-stat"><div class="adm-sv" id="ds-q">0</div><div class="adm-sk">Questions</div></div>
+          <div class="adm-stat"><div class="adm-sv" id="ds-u">0</div><div class="adm-sk">Unread</div></div>
+          <div class="adm-stat"><div class="adm-sv">∞</div><div class="adm-sk">Curiosity</div></div>
+        </div>
+        <p style="font-size:17px;color:var(--sub);line-height:1.85">Welcome back, Daniyal. Manage your research papers and read questions submitted by visitors — no email needed from them.</p>
+        <p style="font-size:13px;color:var(--dim);margin-top:14px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;line-height:1.7">TIP — Questions arrive anonymously from the Ask page. Mark them as read once reviewed. Papers have a Cover Image field for beautiful 3-column cards.</p>
+      </div>
+
+      <!-- QUESTIONS INBOX -->
+      <div class="adm-pnl" id="pnl-inbox">
+        <div class="adm-pttl">Questions Inbox</div><div class="adm-psub">// FROM VISITORS</div>
+        <div class="adm-list" id="adm-questions"></div>
+      </div>
+      <div class="adm-pnl" id="pnl-new-paper">
+        <div class="adm-pttl">Write Research Paper</div><div class="adm-psub">// PAPERS ARCHIVE</div>
+        <div class="af-g"><label class="af-l">Paper Title *</label><input class="af-i" id="pp-ttl" type="text" placeholder="Full paper title…"></div>
+        <!-- COVER IMAGE -->
+        <div class="af-g">
+          <label class="af-l">Cover Image — shown on paper front page &amp; card</label>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start">
+            <input class="af-i" id="pp-img-url" type="text" placeholder="Paste image URL (https://…) or upload below">
+            <label style="display:flex;align-items:center;gap:8px;padding:13px 18px;border:1px solid rgba(79,195,247,.3);color:var(--plasma);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='var(--plbg)'" onmouseout="this.style.background='none'">
+              📁 Upload File
+              <input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this)">
+            </label>
+          </div>
+          <div id="img-preview" style="display:none;margin-top:12px;position:relative">
+            <img id="img-preview-img" style="width:100%;max-height:200px;object-fit:cover;border:1px solid var(--rim);filter:brightness(.7)" src="" alt="preview">
+            <button onclick="clearImg()" style="position:absolute;top:8px;right:8px;background:rgba(3,5,10,.8);border:1px solid var(--red);color:var(--red);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer">✕ Remove</button>
+            <div style="position:absolute;bottom:8px;left:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.5);text-transform:uppercase">Cover Image Preview</div>
+          </div>
+        </div>
+        <div class="af-row">
+          <div class="af-g"><label class="af-l">Category</label><select class="af-sel af-i" id="pp-cat"><option>Cosmology</option><option>Dark Energy</option><option>Quantum Gravity</option><option>Black Holes</option><option>Relativity</option><option>Astrophysics</option><option>Mathematical Physics</option><option>Other</option></select></div>
+          <div class="af-g"><label class="af-l">Year</label><input class="af-i" id="pp-yr" type="number" placeholder="2025" min="1900" max="2099"></div>
+        </div>
+        <div class="af-row">
+          <div class="af-g"><label class="af-l">Journal / Preprint Server</label><input class="af-i" id="pp-journal" type="text" placeholder="arXiv, Physical Review D…"></div>
+          <div class="af-g"><label class="af-l">Reading Time (mins)</label><input class="af-i" id="pp-rt" type="number" placeholder="15" min="1"></div>
+        </div>
+        <div class="af-g"><label class="af-l">Abstract * — renders in a highlighted block before the paper</label><textarea class="af-ta" id="pp-abs" style="min-height:110px" placeholder="A concise summary of the paper's contributions and findings…"></textarea></div>
+        <div class="af-g"><label class="af-l">Keywords (comma separated)</label><input class="af-i" id="pp-kw" type="text" placeholder="dark energy, Hubble tension, lambda CDM…"></div>
+        <div class="af-g">
+          <label class="af-l">Paper Body * — write as a full essay</label>
+          <div class="et">
+            <button class="tb" onclick="fp2('bold')"><b>B</b></button><button class="tb" onclick="fp2('italic')"><i>I</i></button><button class="tb" onclick="fp2('underline')"><u>U</u></button>
+            <div class="tb-sep"></div>
+            <button class="tb" onclick="fp2b('h2')">H2</button><button class="tb" onclick="fp2b('h3')">H3</button>
+            <div class="tb-sep"></div>
+            <button class="tb" onclick="fp2b('blockquote')">" Quote</button><button class="tb" onclick="fp2('insertUnorderedList')">• List</button><button class="tb" onclick="fp2('insertOrderedList')">1. List</button>
+            <div class="tb-sep"></div>
+            <button class="tb" onclick="flink2()">Link</button><button class="tb" onclick="fp2b('pre')">{ Code }</button>
+          </div>
+          <div class="ed" id="pp-body" contenteditable="true" placeholder="Write the full paper — Introduction, Methodology, Results, Discussion, Conclusion…"></div>
+        </div>
+        <button class="af-sub" onclick="submitPaper()">PUBLISH PAPER</button>
+      </div>
+      <div class="adm-pnl" id="pnl-all-papers">
+        <div class="adm-pttl">All Papers</div><div class="adm-psub">// MANAGE</div>
+        <div class="adm-list" id="adm-papers"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-top">
+    <div><div class="ft-brand">DHS COSMOLOGY</div><p class="ft-tag">Research and writing at the frontier of modern cosmology by Daniyal. Speculative, rigorous, and always curious about the infinite.</p></div>
+    <div><div class="ft-ct">Navigate</div><div class="ft-links"><span class="ft-link" onclick="go('home')">Home</span><span class="ft-link" onclick="go('papers')">Papers</span><span class="ft-link" onclick="go('about')">About</span><span class="ft-link" onclick="go('contact')">Contact</span></div></div>
+    <div><div class="ft-ct">Research</div><div class="ft-links"><span class="ft-link">Dark Energy</span><span class="ft-link">Quantum Gravity</span><span class="ft-link">Black Holes</span><span class="ft-link">Large-Scale Structure</span></div></div>
+    <div><div class="ft-ct">Connect</div><div class="ft-links"><a class="ft-link" href="mailto:daniyalhasan727@gmail.com">daniyalhasan727@gmail.com</a><a class="ft-link" href="https://arxiv.org" target="_blank">arXiv</a><a class="ft-link" href="https://orcid.org" target="_blank">ORCID</a><a class="ft-link" href="https://scholar.google.com" target="_blank">Google Scholar</a></div></div>
+  </div>
+  <div class="ft-bot"><div class="ft-copy">© <span id="yr"></span> Daniyal · DHS Cosmology</div><div class="ft-clk" id="clk">—</div></div>
+</footer>
+
+<!-- LOGIN -->
+<div id="login-ov">
+  <div class="lb">
+    <button class="lb-close" onclick="closeLg()">✕</button>
+    <div class="lb-ttl">ADMIN ACCESS</div>
+    <div class="lb-sub">// Enter Password</div>
+    <div class="lb-err" id="lb-err">Incorrect password. Try again.</div>
+    <div class="cf-g"><label class="cf-l">Password</label><input class="cf-i" type="password" id="lpw" placeholder="Password…" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-plasma" onclick="doLogin()" style="width:100%;padding:15px;margin-top:4px">ENTER DASHBOARD</button>
+    <p style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim)">Default password: cosmos2025</p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* STARFIELD */
+const sky=document.getElementById('sky'),cx=sky.getContext('2d');
+let W,H,ST=[],NB=[];
+function rz(){W=sky.width=innerWidth;H=sky.height=innerHeight;NB=[{x:W*.72,y:H*.28,r:280,c:'rgba(79,195,247,.06)'},{x:W*.18,y:H*.62,r:220,c:'rgba(26,42,94,.1)'},{x:W*.5,y:H*.8,r:180,c:'rgba(232,213,163,.04)'}]}
+function mkST(){ST=[];for(let i=0;i<290;i++)ST.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.7+.2,op:Math.random()*.7+.15,sp:Math.random()*.018+.004,off:Math.random()*Math.PI*2,vx:(Math.random()-.5)*.06,vy:Math.random()*.04+.007,c:Math.random()>.88?'#e8d5a3':Math.random()>.93?'#4fc3f7':'#ffffff'})}
+let fr=0;
+function draw(){cx.clearRect(0,0,W,H);fr++;NB.forEach(n=>{const g=cx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);g.addColorStop(0,n.c);g.addColorStop(1,'transparent');cx.fillStyle=g;cx.beginPath();cx.arc(n.x,n.y,n.r,0,Math.PI*2);cx.fill()});ST.forEach(s=>{s.y+=s.vy;s.x+=s.vx;if(s.y>H){s.y=0;s.x=Math.random()*W}if(s.x<0||s.x>W)s.vx*=-1;const tw=Math.sin(fr*s.sp+s.off)*.35+.65;cx.globalAlpha=s.op*tw;cx.fillStyle=s.c;cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fill()});cx.globalAlpha=1;requestAnimationFrame(draw)}
+window.addEventListener('resize',rz);rz();mkST();draw();
+
+/* CURSOR */
+const cur=document.getElementById('cur'),curR=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(anim)})();
+document.addEventListener('mouseover',e=>{if(e.target.matches('button,a,input,textarea,select,.card,.prow,.adm-item,.c-link,.int,.adm-li')){cur.style.transform='translate(-50%,-50%) scale(2)';curR.style.width='56px';curR.style.height='56px'}});
+document.addEventListener('mouseout',e=>{if(e.target.matches('button,a,input,textarea,select,.card,.prow,.adm-item,.c-link,.int,.adm-li')){cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.width='38px';curR.style.height='38px'}});
+
+/* DATA */
+let DB={
+  papers:JSON.parse(localStorage.getItem('dhs_papers')||'[]'),
+  questions:JSON.parse(localStorage.getItem('dhs_questions')||'[]')
+};
+let isAdmin=false,pF='All';
+const PW='cosmos2025';
+function save(){
+  localStorage.setItem('dhs_papers',JSON.stringify(DB.papers));
+  localStorage.setItem('dhs_questions',JSON.stringify(DB.questions));
+}
+
+/* ROUTING */
+const PAGES=['home','papers','paper','ask','about','contact','admin'];
+function go(id){
+  PAGES.forEach(p=>{const el=document.getElementById('p-'+p);if(el)el.classList.remove('on')});
+  const el=document.getElementById('p-'+id);if(el)el.classList.add('on');
+  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
+  const m={home:0,papers:1,about:2,contact:3};
+  if(m[id]!=null)document.querySelectorAll('.nl')[m[id]]?.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('nlinks').classList.remove('open');
+  const pb=document.getElementById('prog');
+  pb.style.display=(id==='paper')?'block':'none';
+  if(id==='home')renderHome();
+  if(id==='papers')renderPapers();
+  if(id==='ask')renderAsk();
+  if(id==='admin'){renderAdm();swp('dash',document.querySelector('.adm-item'))}
+  reveal();
+}
+function toggleNav(){document.getElementById('nlinks').classList.toggle('open')}
+
+/* AUTH */
+function onAdminClick(){isAdmin?logout():openLg()}
+function openLg(){document.getElementById('login-ov').classList.add('show');setTimeout(()=>document.getElementById('lpw').focus(),180)}
+function closeLg(){document.getElementById('login-ov').classList.remove('show');document.getElementById('lpw').value='';document.getElementById('lb-err').classList.remove('show')}
+function doLogin(){if(document.getElementById('lpw').value===PW){isAdmin=true;closeLg();const b=document.getElementById('adminBtn');b.textContent='Log Out';b.classList.add('out');go('admin');toast('✦ Welcome back, Daniyal')}else{document.getElementById('lb-err').classList.add('show');document.getElementById('lpw').value='';document.getElementById('lpw').focus()}}
+function logout(){isAdmin=false;const b=document.getElementById('adminBtn');b.textContent='Admin';b.classList.remove('out');go('home');toast('Logged out')}
+
+/* PANELS */
+function swp(name,btn){
+  document.querySelectorAll('.adm-pnl').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.adm-item').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pnl-'+name).classList.add('on');
+  btn.classList.add('on');
+  if(name==='inbox')rAdmQuestions();
+  if(name==='all-papers')rAdmPapers();
+  if(name==='dash')updDash();
+}
+function renderAdm(){updDash();rAdmQuestions();rAdmPapers()}
+function updDash(){
+  const unread=DB.questions.filter(q=>!q.read).length;
+  document.getElementById('ds-r').textContent=DB.papers.length;
+  document.getElementById('ds-q').textContent=DB.questions.length;
+  document.getElementById('ds-u').textContent=unread;
+}
+
+/* EDITORS */
+function fp2(cmd){document.getElementById('pp-body').focus();document.execCommand(cmd,false,null)}
+function fp2b(tag){document.getElementById('pp-body').focus();document.execCommand('formatBlock',false,tag)}
+function flink2(){const u=prompt('URL:');if(u){document.getElementById('pp-body').focus();document.execCommand('createLink',false,u)}}
+
+/* IMAGE UPLOAD */
+let _imgData='';
+function handleImgUpload(inp){
+  const file=inp.files[0];if(!file)return;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    _imgData=e.target.result;
+    document.getElementById('pp-img-url').value='[uploaded]';
+    const prev=document.getElementById('img-preview');
+    document.getElementById('img-preview-img').src=_imgData;
+    prev.style.display='block';
+  };
+  rd.readAsDataURL(file);
+}
+function clearImg(){
+  _imgData='';document.getElementById('pp-img-url').value='';
+  document.getElementById('img-preview').style.display='none';
+  document.getElementById('img-preview-img').src='';
+}
+function getImgSrc(){
+  if(_imgData)return _imgData;
+  const url=document.getElementById('pp-img-url').value.trim();
+  if(url&&url!=='[uploaded]')return url;
+  return '';
+}
+
+/* SUBMIT PAPER */
+function submitPaper(){
+  const t=document.getElementById('pp-ttl').value.trim(),ab=document.getElementById('pp-abs').value.trim(),b=document.getElementById('pp-body').innerHTML.trim(),rt=document.getElementById('pp-rt').value||'15';
+  if(!t||!ab||!b){toast('Fill in all required fields','err');return}
+  const img=getImgSrc();
+  DB.papers.unshift({
+    id:Date.now(),title:t,cat:document.getElementById('pp-cat').value,
+    year:document.getElementById('pp-yr').value||new Date().getFullYear(),
+    journal:document.getElementById('pp-journal').value.trim(),
+    abstract:ab,keywords:document.getElementById('pp-kw').value,
+    body:b,img:img,readtime:rt+' min read',
+    date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),
+    ts:Date.now()
+  });
+  save();
+  ['pp-ttl','pp-yr','pp-journal','pp-abs','pp-kw','pp-rt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pp-body').innerHTML='';
+  clearImg();
+  updDash();toast('✦ Paper published!');swp('all-papers',document.querySelectorAll('.adm-item')[3]);
+}
+
+/* SUBMIT QUESTION */
+function submitQuestion(){
+  const q=(document.getElementById('ask-q').value||'').trim();
+  if(!q){toast('Please type a question first','err');return}
+  DB.questions.unshift({
+    id:Date.now(),text:q,read:false,
+    date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),
+    ts:Date.now()
+  });
+  save();
+  document.getElementById('ask-q').value='';
+  toast('✦ Question sent — Daniyal will read it!');
+  renderAsk();
+}
+/* SUBMIT HOME QUESTION (search bar) */
+function submitHomeQ(){
+  const inp=document.getElementById('home-q');
+  const q=(inp.value||'').trim();
+  if(!q){inp.focus();return}
+  DB.questions.unshift({
+    id:Date.now(),text:q,read:false,
+    date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),
+    ts:Date.now()
+  });
+  save();
+  inp.value='';
+  renderHome();
+  toast('✦ Question sent — Daniyal will read it!');
+}
+
+/* TYPEWRITER PLACEHOLDER */
+const TW_PROMPTS=[
+  'What is dark energy really?',
+  'Does time exist outside the universe?',
+  'How does gravity bend spacetime?',
+  'What happens inside a black hole?',
+  'Is the multiverse real?',
+  'What came before the Big Bang?',
+  'How large is the observable universe?',
+  'Could we detect a parallel universe?',
+];
+let _twIdx=0,_twChar=0,_twTimer=null,_twDir=1,_twPause=0;
+function startTypewriter(){
+  const inp=document.getElementById('home-q');
+  if(inp.value)return; // don't overwrite user input
+  inp.placeholder='';
+  clearInterval(_twTimer);
+  _twTimer=setInterval(()=>{
+    if(inp===document.activeElement&&inp.value)return;
+    const word=TW_PROMPTS[_twIdx];
+    if(_twPause>0){_twPause--;return}
+    if(_twDir===1){
+      _twChar++;
+      inp.placeholder=word.slice(0,_twChar)+'|';
+      if(_twChar>=word.length){_twDir=-1;_twPause=28}
+    } else {
+      _twChar--;
+      inp.placeholder=word.slice(0,_twChar)+((_twChar>0)?'|':'');
+      if(_twChar<=0){_twDir=1;_twIdx=(_twIdx+1)%TW_PROMPTS.length;_twPause=10}
+    }
+  },55);
+}
+function stopTypewriter(){
+  clearInterval(_twTimer);
+  const inp=document.getElementById('home-q');
+  if(!inp.value)inp.placeholder='Type your question and press Enter…';
+}
+
+// Ctrl+Enter to submit from anywhere on home-q
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key==='Enter'&&document.getElementById('home-q')===document.activeElement)submitHomeQ();
+  if(e.key==='Escape')closeLg();
+});
+
+/* DELETE */
+function delPaper(id){if(!confirm('Delete this paper?'))return;DB.papers=DB.papers.filter(p=>p.id!==id);save();rAdmPapers();updDash();toast('Paper deleted')}
+function delQuestion(id){if(!confirm('Delete this question?'))return;DB.questions=DB.questions.filter(q=>q.id!==id);save();rAdmQuestions();updDash();toast('Question deleted')}
+function markRead(id){const q=DB.questions.find(x=>x.id===id);if(q){q.read=true;save();rAdmQuestions();updDash()}}
+
+/* ADMIN LISTS */
+function rAdmPapers(){
+  const el=document.getElementById('adm-papers');
+  if(!DB.papers.length){el.innerHTML=`<div class="empty">${mkE('📄','No papers yet')}</div>`;return}
+  el.innerHTML=DB.papers.map(p=>`<div class="adm-li">
+    <div style="display:flex;align-items:center;gap:12px;flex:1">
+      ${p.img?`<img src="${p.img}" style="width:52px;height:36px;object-fit:cover;border:1px solid var(--rim);opacity:.7;flex-shrink:0">`:''}
+      <div><div class="ali-ttl">${p.title}</div><div class="ali-m">${p.cat} · ${p.year} · ${p.journal||'Preprint'}</div></div>
+    </div>
+    <div class="ali-acts"><button class="ali-btn" onclick="openPaper(${p.id})">View</button><button class="ali-btn del" onclick="delPaper(${p.id})">Delete</button></div>
+  </div>`).join('')
+}
+function rAdmQuestions(){
+  const el=document.getElementById('adm-questions');
+  if(!DB.questions.length){el.innerHTML=`<div class="empty">${mkE('💬','No questions yet — they appear here when visitors use the Ask page')}</div>`;return}
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:2px;background:var(--rim2)">`+
+    DB.questions.map(q=>`<div class="q-inbox-row ${q.read?'read':'unread'}">
+      <div style="flex:1">
+        <div class="qi-txt">${q.text}</div>
+        <div class="qi-meta">${q.date}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+        <span class="qi-badge ${q.read?'read-badge':''}">${q.read?'READ':'NEW'}</span>
+        ${!q.read?`<button class="ali-btn" onclick="markRead(${q.id})">Mark Read</button>`:''}
+        <button class="ali-btn del" onclick="delQuestion(${q.id})">Delete</button>
+      </div>
+    </div>`).join('')+'</div>';
+}
+
+/* HOME */
+function renderHome(){
+  document.getElementById('hn-papers').textContent=DB.papers.length;
+  document.getElementById('hn-questions').textContent=DB.questions.length;
+  if(document.getElementById('sb-papers')){
+    document.getElementById('sb-papers').textContent=DB.papers.length;
+    document.getElementById('sb-questions').textContent=DB.questions.length;
+    document.getElementById('sb-r-bg').textContent=DB.papers.length||'0';
+    document.getElementById('sb-q-bg').textContent=DB.questions.length||'0';
+  }
+  const hp=document.getElementById('home-papers');
+  const paps=DB.papers.slice(0,6);
+  if(!paps.length){
+    hp.className='';
+    hp.innerHTML=`<div class="empty">${mkE('🔭','No papers yet — write from the admin panel')}</div>`;
+    return;
+  }
+  // Choose collage class based on count
+  const n=paps.length;
+  let cls='pcollage ';
+  if(n===1)cls+='c1';
+  else if(n===2)cls+='c2';
+  else if(n===3)cls+='c3';
+  else if(n===4)cls+='c4';
+  else if(n===5)cls+='c5';
+  else cls+='many';
+  hp.className=cls;
+  hp.innerHTML=paps.map(p=>pCard(p)).join('');
+  hp.querySelectorAll('.pcard').forEach(r=>r.addEventListener('click',()=>openPaper(+r.dataset.id)));
+}
+
+/* ASK PAGE */
+function renderAsk(){
+  const el=document.getElementById('ask-recent');
+  const recent=DB.questions.slice(0,8);
+  if(!recent.length){
+    el.innerHTML=`<div class="empty">${mkE('💭','Be the first to ask a question!')}</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="qlist">`+
+    recent.map(q=>`<div class="qrow"><div class="qrow-txt">"${q.text}"</div><div class="qrow-meta">${q.date}</div></div>`).join('')+
+  `</div>`;
+}
+
+/* PAPERS PAGE */
+function renderPapers(){
+  const list=document.getElementById('papers-list'),q=(document.getElementById('ps').value||'').toLowerCase();
+  const cats=['All',...new Set(DB.papers.map(p=>p.cat).filter(Boolean))];
+  document.getElementById('pfltrs').innerHTML=cats.map(c=>`<button class="ftag ${c===pF?'on':''}" onclick="pF='${c}';renderPapers()">${c}</button>`).join('');
+  let items=DB.papers;
+  if(pF!=='All')items=items.filter(p=>p.cat===pF);
+  if(q)items=items.filter(p=>p.title.toLowerCase().includes(q)||p.abstract.toLowerCase().includes(q)||(p.keywords||'').toLowerCase().includes(q));
+  if(!items.length){
+    list.className='pgrid';
+    list.innerHTML=`<div class="empty" style="grid-column:1/-1">${mkE(DB.papers.length?'⌕':'🔭',DB.papers.length?'No papers match search':'No papers yet — write from admin')}</div>`;
+    return;
+  }
+  list.className='pgrid';
+  list.innerHTML=items.map(p=>pCard(p)).join('');
+  list.querySelectorAll('.pcard').forEach(r=>r.addEventListener('click',()=>openPaper(+r.dataset.id)));
+}
+
+/* OPEN PAPER */
+function openPaper(id){
+  const p=DB.papers.find(x=>x.id===id);if(!p)return;
+  document.getElementById('paper-back').onclick=()=>go('papers');
+  const cw=document.getElementById('paper-cover-wrap');
+  if(p.img){
+    cw.innerHTML=`<div class="paper-cover"><img src="${p.img}" alt="${p.title}"><div class="paper-cover-overlay"></div><div class="paper-cover-badge">${p.cat} · ${p.year}</div></div>`;
+  }else{
+    cw.innerHTML=`<div class="paper-cover-placeholder"></div>`;
+  }
+  document.getElementById('paper-hd').innerHTML=`<div class="art-kicker">${p.cat}</div><h1 class="art-h1">${p.title}</h1><p class="art-lead" style="font-size:18px;color:var(--dim)">${p.journal||'Preprint'} · ${p.year}${p.keywords?' · '+p.keywords.split(',').slice(0,3).join(', '):''}</p><div class="art-meta"><span>${p.date}</span><span class="art-meta-dot">✦</span><span>${p.readtime}</span></div>`;
+  const kw=(p.keywords||'').split(',').filter(k=>k.trim()).map(k=>`<span class="ptag">${k.trim()}</span>`).join('');
+  document.getElementById('paper-abstract').innerHTML=`<div class="ab-label">// ABSTRACT</div><div class="ab-text">${p.abstract}</div>${kw?`<div class="ab-keywords">${kw}</div>`:''}`;
+  document.getElementById('paper-bd').innerHTML=p.body+'<div class="art-end">End of Paper</div>';
+  go('paper');setupProg();
+}
+
+/* READING PROGRESS */
+function setupProg(){
+  const pb=document.getElementById('prog');pb.style.width='0%';
+  window.removeEventListener('scroll',window._rp);
+  window._rp=()=>{const d=document.documentElement,s=d.scrollTop,t=d.scrollHeight-d.clientHeight;pb.style.width=(t>0?Math.min(100,s/t*100):0)+'%'};
+  window.addEventListener('scroll',window._rp);
+}
+
+/* TEMPLATES */
+function pCard(p){
+  const kw=(p.keywords||'').split(',').slice(0,3).filter(k=>k.trim()).map(k=>`<span class="ptag">${k.trim()}</span>`).join('');
+  const imgHtml=p.img
+    ?`<img src="${p.img}" alt="${p.title}" loading="lazy"><div class="pcard-img-yr">${p.year||''}</div>`
+    :`<div class="pcard-img-ph">✦</div><div class="pcard-img-yr">${p.year||''}</div>`;
+  return`<div class="pcard" data-id="${p.id}">
+    <div class="pcard-img">${imgHtml}</div>
+    <div class="pcard-body">
+      <div class="pcard-kicker">${p.cat}</div>
+      <div class="pcard-ttl">${p.title}</div>
+      <div class="pcard-abs">${p.abstract}</div>
+      <div class="pcard-tags">${kw}</div>
+      <div class="pcard-ft"><span>${p.journal||'Preprint'} · ${p.year}</span><span class="pcard-arr">${p.readtime} →</span></div>
+    </div>
+  </div>`;
+}
+function mkE(ico,txt){return`<div class="empty-ico">${ico}</div><div class="empty-txt">${txt}</div>`}
+
+/* REVEAL */
+function reveal(){const obs=new IntersectionObserver(ee=>{ee.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.1});document.querySelectorAll('.rv:not(.in)').forEach(el=>obs.observe(el))}
+
+/* TOAST */
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.classList.toggle('err',type==='err');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3200)}
+
+/* CLOCK */
+function tick(){const n=new Date();document.getElementById('clk').textContent=`RA ${n.getUTCHours().toString().padStart(2,'0')}h ${n.getUTCMinutes().toString().padStart(2,'0')}m · UTC`;document.getElementById('yr').textContent=n.getFullYear()}
+tick();setInterval(tick,1000);
+
+/* INIT */
+renderHome();reveal();
+setTimeout(startTypewriter, 1200);
+</script>
+</body>
+</html>
