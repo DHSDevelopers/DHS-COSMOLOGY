@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" href="/favicon-96x96.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DHS Cosmology — Daniyal</title>
@@ -926,6 +925,13 @@ footer{position:relative;z-index:1;background:var(--deep);border-top:1px solid v
         </div>
         <p style="font-size:17px;color:var(--sub);line-height:1.85">Welcome back, Daniyal. Manage your research papers and read questions submitted by visitors — no email needed from them.</p>
         <p style="font-size:13px;color:var(--dim);margin-top:14px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;line-height:1.7">TIP — Questions arrive anonymously from the Ask page. Mark them as read once reviewed. Papers have a Cover Image field for beautiful 3-column cards.</p>
+
+        <div style="margin-top:36px;padding:28px 32px;background:var(--well);border:1px solid rgba(79,195,247,.15);border-left:3px solid var(--plasma)">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#fff;margin-bottom:6px">EXPORT & PUBLISH SITE</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--plasma);margin-bottom:14px">// FOR INSTAGRAM & ALL BROWSERS</div>
+          <p style="font-size:15px;color:var(--sub);line-height:1.75;margin-bottom:20px">Instagram and some mobile browsers block local storage, so visitors can't see your papers. Click below to download a fresh copy of the site with <strong style="color:var(--text)">all your current papers baked in</strong> — replace your hosted file with this export and everyone sees everything, everywhere.</p>
+          <button class="af-sub" onclick="exportSite()" style="margin-top:0">⬇ DOWNLOAD UPDATED SITE</button>
+        </div>
       </div>
 
       <!-- QUESTIONS INBOX -->
@@ -1029,34 +1035,41 @@ document.addEventListener('mouseover',e=>{if(e.target.matches('button,a,input,te
 document.addEventListener('mouseout',e=>{if(e.target.matches('button,a,input,textarea,select,.card,.prow,.adm-item,.c-link,.int,.adm-li')){cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.width='38px';curR.style.height='38px'}});
 
 /* DATA */
-const DEFAULT_PAPERS = [
-  {
-    id: 1,
-    title: "Your Paper Title Here",
-    cat: "Cosmology",
-    year: "2025",
-    journal: "arXiv",
-    abstract: "Your abstract text here...",
-    keywords: "dark energy, cosmology",
-    body: "<p>Your full paper body here...</p>",
-    img: "",
-    readtime: "15 min read",
-    date: "January 1, 2025",
-    ts: 1
-  }
-  // add more papers here
-];
+// BAKED-IN PAPERS — updated every time you export from admin
+const BAKED_PAPERS = /*BAKED_START*/[]/*BAKED_END*/;
 
-const saved = JSON.parse(localStorage.getItem('dhs_papers') || 'null');
-let DB = {
-  papers: saved || DEFAULT_PAPERS,
-  questions: JSON.parse(localStorage.getItem('dhs_questions') || '[]')
+// Merge: localStorage wins if it has more papers, else use baked
+const _lsPapers = JSON.parse(localStorage.getItem('dhs_papers')||'null');
+const _papers = (_lsPapers && _lsPapers.length >= BAKED_PAPERS.length) ? _lsPapers : BAKED_PAPERS;
+
+let DB={
+  papers: _papers,
+  questions:JSON.parse(localStorage.getItem('dhs_questions')||'[]')
 };
 let isAdmin=false,pF='All';
 const PW='cosmos2025';
 function save(){
   localStorage.setItem('dhs_papers',JSON.stringify(DB.papers));
   localStorage.setItem('dhs_questions',JSON.stringify(DB.questions));
+}
+
+/* EXPORT SITE */
+function exportSite(){
+  if(!DB.papers.length){toast('No papers to export yet — publish a paper first','err');return}
+  const papersJSON = JSON.stringify(DB.papers);
+  // Read current page HTML and inject baked papers
+  const html = document.documentElement.outerHTML;
+  const updated = html.replace(
+    /\/\*BAKED_START\*\/.*?\/\*BAKED_END\*\//s,
+    `/*BAKED_START*/${papersJSON}/*BAKED_END*/`
+  );
+  const blob = new Blob([updated], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dhs-cosmology.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('✦ Site exported! Replace your hosted file with this download.');
 }
 
 /* ROUTING */
