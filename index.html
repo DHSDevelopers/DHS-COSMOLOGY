@@ -1029,9 +1029,28 @@ document.addEventListener('mouseover',e=>{if(e.target.matches('button,a,input,te
 document.addEventListener('mouseout',e=>{if(e.target.matches('button,a,input,textarea,select,.card,.prow,.adm-item,.c-link,.int,.adm-li')){cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.width='38px';curR.style.height='38px'}});
 
 /* DATA */
-let DB={
-  papers:JSON.parse(localStorage.getItem('dhs_papers')||'[]'),
-  questions:JSON.parse(localStorage.getItem('dhs_questions')||'[]')
+const DEFAULT_PAPERS = [
+  {
+    id: 1,
+    title: "Your Paper Title Here",
+    cat: "Cosmology",
+    year: "2025",
+    journal: "arXiv",
+    abstract: "Your abstract text here...",
+    keywords: "dark energy, cosmology",
+    body: "<p>Your full paper body here...</p>",
+    img: "",
+    readtime: "15 min read",
+    date: "January 1, 2025",
+    ts: 1
+  }
+  // add more papers here
+];
+
+const saved = JSON.parse(localStorage.getItem('dhs_papers') || 'null');
+let DB = {
+  papers: saved || DEFAULT_PAPERS,
+  questions: JSON.parse(localStorage.getItem('dhs_questions') || '[]')
 };
 let isAdmin=false,pF='All';
 const PW='cosmos2025';
